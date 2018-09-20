@@ -51,4 +51,6 @@ target/
 *.MF
 
 *.prefs
-/huechain/target/
+/huechain/target/*
+huechain/target/*
+target/*
