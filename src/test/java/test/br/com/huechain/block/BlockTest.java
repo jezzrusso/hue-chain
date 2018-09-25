@@ -23,5 +23,13 @@ public class BlockTest {
 		assertEquals(stringBlock, block.toString());
 
 	}
+	
+	@Test
+	public void genesisMustBeEternal() {
+		String genesisOne = Block.genesis().toString();
+		String genesisTwo = Block.genesis().toString();
+		
+		assertEquals(genesisTwo, genesisOne);
+	}
 
 }
