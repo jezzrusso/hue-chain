@@ -1,5 +1,7 @@
 package br.com.jezzrusso.huechain.block;
 
+import java.util.Calendar;
+
 public class Block {
 
 	private Long timestamp;
@@ -23,6 +25,11 @@ public class Block {
 	
 	public static Block genesis() {
 		return new Block(0L, "------", "g3n3515", "[]");
+	}
+	
+	public static Block mineBlock(Block lastBlock, String data) {
+		final Long timestamp = Calendar.getInstance().getTimeInMillis();
+		return new Block(timestamp, lastBlock.getHash(), "TODO", data);
 	}
 	
 	public Long getTimestamp() {
