@@ -30,8 +30,7 @@ public class Block {
 
 	public static Block mineBlock(String lastHash, String data) {
 		final Long timestamp = Calendar.getInstance().getTimeInMillis();
-		return new Block(timestamp, lastHash, 
-				hash(timestamp, lastHash, data), data);
+		return new Block(timestamp, lastHash, hash(timestamp, lastHash, data), data);
 	}
 
 	public static String hash(Long timestamp, String lastHash, String data) {
@@ -42,32 +41,16 @@ public class Block {
 		return timestamp;
 	}
 
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
-	}
-
 	public String getLastHash() {
 		return lastHash;
-	}
-
-	public void setLastHash(String lastHash) {
-		this.lastHash = lastHash;
 	}
 
 	public String getHash() {
 		return hash;
 	}
 
-	public void setHash(String hash) {
-		this.hash = hash;
-	}
-
 	public String getData() {
 		return data;
-	}
-
-	public void setData(String data) {
-		this.data = data;
 	}
 
 }
