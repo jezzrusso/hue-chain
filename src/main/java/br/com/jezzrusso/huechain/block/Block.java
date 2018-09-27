@@ -6,10 +6,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 public class Block {
 
-	private Long timestamp;
-	private String lastHash;
-	private String hash;
-	private String data;
+	private final Long timestamp;
+	private final String lastHash;
+	private final String hash;
+	private final String data;
 
 	public Block(Long timestamp, String lastHash, String hash, String data) {
 		super();
