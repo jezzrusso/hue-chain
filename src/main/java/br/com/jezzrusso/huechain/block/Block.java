@@ -2,6 +2,8 @@ package br.com.jezzrusso.huechain.block;
 
 import java.util.Calendar;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 public class Block {
 
 	private Long timestamp;
@@ -16,56 +18,56 @@ public class Block {
 		this.hash = hash;
 		this.data = data;
 	}
-	
 
 	@Override
 	public String toString() {
 		return "{Block:{timestamp:" + timestamp + ",lastHash:" + lastHash + ",hash:" + hash + ",data:" + data + "}}";
 	}
-	
+
 	public static Block genesis() {
 		return new Block(0L, "------", "g3n3515", "[]");
 	}
-	
-	public static Block mineBlock(Block lastBlock, String data) {
+
+	public static Block mineBlock(String lastHash, String data) {
 		final Long timestamp = Calendar.getInstance().getTimeInMillis();
-		return new Block(timestamp, lastBlock.getHash(), "TODO", data);
+		return new Block(timestamp, lastHash, 
+				hash(timestamp, lastHash, data), data);
 	}
-	
+
+	public static String hash(Long timestamp, String lastHash, String data) {
+		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data));
+	}
+
 	public Long getTimestamp() {
 		return timestamp;
 	}
-	
+
 	public void setTimestamp(Long timestamp) {
 		this.timestamp = timestamp;
 	}
-	
+
 	public String getLastHash() {
 		return lastHash;
 	}
-	
+
 	public void setLastHash(String lastHash) {
 		this.lastHash = lastHash;
 	}
-	
+
 	public String getHash() {
 		return hash;
 	}
-	
+
 	public void setHash(String hash) {
 		this.hash = hash;
 	}
-	
+
 	public String getData() {
 		return data;
 	}
-	
+
 	public void setData(String data) {
 		this.data = data;
 	}
-
-	
-
-	
 
 }

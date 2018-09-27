@@ -1,6 +1,7 @@
 package test.br.com.huechain.block;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.Calendar;
 
@@ -35,9 +36,13 @@ public class BlockTest {
 	@Test
 	public void mineBlockMustWorks() {
 		Block genesis = Block.genesis();
-		Block hueBlock = Block.mineBlock(genesis, "hue");
+		Block hueBlock = Block.mineBlock(genesis.getHash(), "hue");
 		assertEquals("lastHash must be equals gensis block in second block in blockchain", genesis.getHash(),
 				hueBlock.getLastHash());
+		assertNotNull("hash of block should be not empty", hueBlock.getHash());
+		
 	}
+	
+	
 
 }
