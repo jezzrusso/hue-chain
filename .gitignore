@@ -3,6 +3,12 @@
 
 # Log file
 *.log
+war/logs/*
+war/logs
+war/target/*
+ear/target/*
+*/target/*
+*/target/**
 
 # BlueJ files
 *.ctxt
@@ -48,9 +54,3 @@ dist/
 nbdist/
 .nb-gradle/
 target/
-*.MF
-
-*.prefs
-/huechain/target/*
-huechain/target/*
-target/*
