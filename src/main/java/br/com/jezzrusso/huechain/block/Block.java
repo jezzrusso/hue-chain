@@ -37,6 +37,10 @@ public class Block {
 		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data));
 	}
 
+	public static String blockHash(Block block) {
+		return hash(block.getTimestamp(), block.getLastHash(), block.getData());
+	}
+
 	public Long getTimestamp() {
 		return timestamp;
 	}
@@ -51,6 +55,60 @@ public class Block {
 
 	public String getData() {
 		return data;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((data == null) ? 0 : data.hashCode());
+		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+		result = prime * result + ((lastHash == null) ? 0 : lastHash.hashCode());
+		result = prime * result + ((timestamp == null) ? 0 : timestamp.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Block)) {
+			return false;
+		}
+		final Block other = (Block) obj;
+		if (data == null) {
+			if (other.data != null) {
+				return false;
+			}
+		} else if (!data.equals(other.data)) {
+			return false;
+		}
+		if (hash == null) {
+			if (other.hash != null) {
+				return false;
+			}
+		} else if (!hash.equals(other.hash)) {
+			return false;
+		}
+		if (lastHash == null) {
+			if (other.lastHash != null) {
+				return false;
+			}
+		} else if (!lastHash.equals(other.lastHash)) {
+			return false;
+		}
+		if (timestamp == null) {
+			if (other.timestamp != null) {
+				return false;
+			}
+		} else if (!timestamp.equals(other.timestamp)) {
+			return false;
+		}
+		return true;
 	}
 
 }
