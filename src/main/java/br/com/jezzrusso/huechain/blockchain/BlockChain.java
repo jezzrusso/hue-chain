@@ -4,12 +4,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Resource;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.WebApplicationContext;
+
 import br.com.jezzrusso.huechain.block.Block;
 
+@Component
+@Scope(value = WebApplicationContext.SCOPE_APPLICATION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class BlockChain {
 
 	private final List<Block> chain;
 
+	@Autowired
 	public BlockChain() {
 		this.chain = new ArrayList<>();
 		this.chain.add(Block.genesis());
