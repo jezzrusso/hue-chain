@@ -2,10 +2,13 @@ package br.com.jezzrusso.huechain.domain;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotNull;
+
 public class Request<T> implements Serializable {
 
 	private static final long serialVersionUID = -7776332469144269729L;
 
+	@NotNull
 	private T data;
 
 	public T getData() {
