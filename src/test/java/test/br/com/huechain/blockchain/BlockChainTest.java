@@ -16,7 +16,7 @@ public class BlockChainTest {
 
 	@Test
 	public void firstBlockMustBeGenesis() {
-		BlockChain blockChain = new BlockChain(new MockedSocketHandler(null));
+		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null));
 		Block block = blockChain.getBlockChain().get(0);
 
 		assertEquals(Block.genesis().getLastHash(), block.getLastHash());
@@ -27,7 +27,7 @@ public class BlockChainTest {
 
 	@Test
 	public void secondBlockMustHaveLastHashEqualsHashGensis() {
-		BlockChain blockChain = new BlockChain(new MockedSocketHandler(null));
+		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null));
 		Block genesisBlock = blockChain.getBlockChain().get(0);
 		Block secondBlock = blockChain.addBlock("primeira mineração");
 
@@ -38,7 +38,7 @@ public class BlockChainTest {
 
 	@Test
 	public void validateAValidChain() {
-		BlockChain blockChain = new BlockChain(new MockedSocketHandler(null));
+		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null));
 		Block secondBlock = blockChain.addBlock("didi mocó");
 
 		assertEquals(Boolean.TRUE, blockChain.isValidChain(blockChain.getBlockChain()));
@@ -46,7 +46,7 @@ public class BlockChainTest {
 	
 	@Test
 	public void invalidateACorruptChain() {
-		BlockChain blockChain = new BlockChain(new MockedSocketHandler(null));
+		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null));
 		blockChain.addBlock("didi mocó");
 		
 		Block blockGenesis = blockChain.getBlockChain().get(0);

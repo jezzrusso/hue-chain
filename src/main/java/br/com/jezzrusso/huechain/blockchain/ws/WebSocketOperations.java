@@ -22,36 +22,28 @@ import com.google.gson.Gson;
 
 import br.com.jezzrusso.huechain.blockchain.BlockChain;
 import br.com.jezzrusso.huechain.blockchain.rest.BlockChainRestController;
+import br.com.jezzrusso.huechain.enums.MessageType;
 
 @Component
 @Scope(value = WebApplicationContext.SCOPE_APPLICATION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class WebSocketOperations {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketOperations.class);
-	
-	private final String websocketAddress;
+
+	private String websocketAddress;
 
 	private final BlockChain blockchain;
 
 	private final SocketHandler socketHandler;
 
 	private WebSocketSession wsSession;
-	
-	public WebSocketOperations(@Value("${wsserver.address}") String websocketAddress, @Autowired BlockChain blockchain,
-			@Autowired SocketHandler socketHandler) {
-		this.websocketAddress = websocketAddress;
+
+	@Autowired
+	public WebSocketOperations(@Value("${wsserver.address}") String websocketAddress, BlockChain blockchain,
+			SocketHandler socketHandler) {
 		this.blockchain = blockchain;
 		this.socketHandler = socketHandler;
-	}
-
-	public void sendMessage(WSMessage wsMessage)
-			throws IOException, InterruptedException, ExecutionException, TimeoutException {
-		String message = new Gson().toJson(wsMessage);
-		WebSocketSession session = connect();
-		if (session == null) {
-			return;
-		}
-		session.sendMessage(new TextMessage(message));
+		this.websocketAddress = websocketAddress;
 	}
 
 	public WebSocketSession connect() throws InterruptedException, ExecutionException, TimeoutException {
@@ -67,9 +59,17 @@ public class WebSocketOperations {
 		}
 		return wsSession;
 	}
-	
-	public void synchChain() {
-		
+
+	public void synchChain() throws IOException {
+
+		for (WebSocketSession webSocketSession : socketHandler.getSessions()) {
+			synchronized (webSocketSession) {
+				WSMessage wsMessage = new WSMessage();
+				wsMessage.setMessageType(MessageType.CHAIN);
+				wsMessage.setBlockchain(blockchain.getBlockChain());
+				webSocketSession.sendMessage(new TextMessage(new Gson().toJson(wsMessage)));
+			}
+		}
 	}
 
 }

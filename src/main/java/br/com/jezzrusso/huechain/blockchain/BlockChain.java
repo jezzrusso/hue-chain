@@ -28,13 +28,13 @@ public class BlockChain {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlockChain.class);
 	private List<Block> chain;
-	private final SocketHandler socketHandler;
-	
+	private final WebSocketOperations webSocketOperations;
+
 	@Autowired
-	public BlockChain(SocketHandler socketHandler) {
+	public BlockChain(WebSocketOperations webSocketOperations) {
 		this.chain = new ArrayList<>();
 		this.chain.add(Block.genesis());
-		this.socketHandler = socketHandler;
+		this.webSocketOperations = webSocketOperations;
 	}
 
 	public Block addBlock(String data) {
@@ -43,22 +43,16 @@ public class BlockChain {
 		chain.add(newBlock);
 		try {
 			this.replaceBlockchain(chain);
-			//TODO: broadcast
-			broadcast();
+			this.webSocketOperations.synchChain();
+			
 		} catch (UnmodifiedBlockchainException e) {
 			LOGGER.info(e.getMessage());
+		} catch (IOException e) {
+			LOGGER.error("Ocorreu um erro ao sincronizar o blockchain.", e);
 		}
 		return newBlock;
 	}
-	
-	private void broadcast() {
-		try {
-			
-			socketHandler.synchChain();
-		} catch (IOException e) {
-			LOGGER.error(e.getMessage(), e);
-		}
-	}
+
 
 	public List<Block> getBlockChain() {
 		return Collections.unmodifiableList(this.chain);

@@ -3,6 +3,7 @@ package br.com.jezzrusso.huechain.blockchain.ws;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -29,17 +30,17 @@ import br.com.jezzrusso.huechain.exceptions.UnmodifiedBlockchainException;
 public class SocketHandler extends TextWebSocketHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SocketHandler.class);
-
+	
 	private final List<WebSocketSession> sessions;
 
-	private BlockChain blockchain;
-
+	private final BlockChain blockchain;
+	
 	@Autowired
 	public SocketHandler(BlockChain blockchain) {
 		this.blockchain = blockchain;
 		this.sessions = new ArrayList<>();
 	}
-
+	
 	@Override
 	public void handleTextMessage(WebSocketSession session, TextMessage message)
 			throws InterruptedException, IOException {
@@ -48,22 +49,14 @@ public class SocketHandler extends TextWebSocketHandler {
 
 			if (wsMessage.getMessageType().equals(MessageType.CHAIN)) {
 
-				try {
 					blockchain.replaceBlockchain(wsMessage.getBlockchain());
-					for (WebSocketSession webSocketSession : sessions) {
-						synchronized (webSocketSession) {
-							webSocketSession.sendMessage(new TextMessage(new Gson().toJson(wsMessage)));
-						}
-					}
-				} catch (UnmodifiedBlockchainException e) {
-					LOGGER.info(e.getMessage());
-				}
-
-			} else if (wsMessage.getMessageType().equals(MessageType.BROADCAST)) {
+					synchChain();
 
 			}
 		} catch (IllegalStateException e) {
-			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getMessage(), e);
+		} catch (UnmodifiedBlockchainException e) {
+			LOGGER.info(e.getMessage());
 		}
 	}
 
@@ -72,10 +65,10 @@ public class SocketHandler extends TextWebSocketHandler {
 		WSMessage wsMessage = new WSMessage();
 		wsMessage.setBlockchain(blockchain.getBlockChain());
 		wsMessage.setMessageType(MessageType.CHAIN);
-		
-		LOGGER.debug(session.getRemoteAddress().getHostName().concat(":")
+
+		LOGGER.info(session.getRemoteAddress().getHostName().concat(":")
 				.concat(String.format("%d", session.getRemoteAddress().getPort()).concat(" conectou.")));
-		
+
 		session.sendMessage(new TextMessage(new Gson().toJson(wsMessage)));
 		sessions.add(session);
 	}
@@ -83,7 +76,8 @@ public class SocketHandler extends TextWebSocketHandler {
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
 		sessions.removeIf(s -> session.getId().equals(s.getId()));
-		System.out.println(session.getId() + " desconectou!");
+		LOGGER.info(session.getRemoteAddress().getHostName().concat(":")
+				.concat(String.format("%d", session.getRemoteAddress().getPort()).concat(" desconectou.")));
 
 	}
 
@@ -91,13 +85,15 @@ public class SocketHandler extends TextWebSocketHandler {
 		return Collections.unmodifiableList(this.sessions);
 	}
 
-	public void synchChain() throws IOException {
+	private void synchChain() throws IOException {
 
 		for (WebSocketSession webSocketSession : sessions) {
-			WSMessage wsMessage = new WSMessage();
-			wsMessage.setMessageType(MessageType.CHAIN);
-			wsMessage.setBlockchain(blockchain.getBlockChain());
-			webSocketSession.sendMessage(new TextMessage(new Gson().toJson(wsMessage)));
+			synchronized (webSocketSession) {
+				WSMessage wsMessage = new WSMessage();
+				wsMessage.setMessageType(MessageType.CHAIN);
+				wsMessage.setBlockchain(blockchain.getBlockChain());
+				webSocketSession.sendMessage(new TextMessage(new Gson().toJson(wsMessage)));
+			}
 		}
 	}
 }
