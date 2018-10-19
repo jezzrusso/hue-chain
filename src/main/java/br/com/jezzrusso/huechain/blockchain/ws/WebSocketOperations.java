@@ -35,8 +35,6 @@ public class WebSocketOperations {
 
 	private final SocketHandler socketHandler;
 
-	private WebSocketSession wsSession;
-
 	@Autowired
 	public WebSocketOperations(@Value("${wsserver.address}") String websocketAddress, BlockChain blockchain,
 			SocketHandler socketHandler) {
@@ -46,17 +44,16 @@ public class WebSocketOperations {
 	}
 
 	public WebSocketSession connect() throws InterruptedException, ExecutionException, TimeoutException {
-		if (wsSession != null && wsSession.isOpen()) {
-			return wsSession;
-		}
 
 		SocketHandler handler = socketHandler;
 		WebSocketClient client = new StandardWebSocketClient();
 
 		if (!StringUtils.isEmpty(websocketAddress)) {
-			wsSession = client.doHandshake(handler, websocketAddress).get();
+			return client.doHandshake(handler, websocketAddress).get();
 		}
-		return wsSession;
+		
+		return null;
+
 	}
 
 	public void synchChain() throws IOException {
