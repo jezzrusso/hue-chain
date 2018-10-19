@@ -59,7 +59,7 @@ public class BlockChain {
 	}
 
 	public Boolean isValidChain(final List<Block> chain) {
-		if (!Block.genesis().equals((Block) chain.get(0)))
+		if (!Block.genesis().equals(chain.get(0)))
 			return Boolean.FALSE;
 
 		for (Integer i = 1; i < chain.size(); i++) {
