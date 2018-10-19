@@ -16,10 +16,6 @@ public class BlockChainWebsocketConfig implements WebSocketConfigurer {
 
 	@Autowired
 	private SocketHandler socketHandler;
-	
-	@Value("${wsserver.address}")
-	private String websocketAddress;
-	
 			
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
