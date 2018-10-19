@@ -4,6 +4,9 @@ import java.util.Calendar;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Block {
 
 	private final Long timestamp;
@@ -11,7 +14,9 @@ public class Block {
 	private final String hash;
 	private final String data;
 
-	public Block(Long timestamp, String lastHash, String hash, String data) {
+	@JsonCreator
+	public Block(@JsonProperty("timestamp") Long timestamp, @JsonProperty("lastHash") String lastHash,
+			@JsonProperty("hash") String hash, @JsonProperty("data") String data) {
 		super();
 		this.timestamp = timestamp;
 		this.lastHash = lastHash;
@@ -69,17 +74,17 @@ public class Block {
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof Block)) {
+		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		final Block other = (Block) obj;
+		Block other = (Block) obj;
 		if (data == null) {
 			if (other.data != null) {
 				return false;
@@ -110,5 +115,6 @@ public class Block {
 		}
 		return true;
 	}
+
 
 }
