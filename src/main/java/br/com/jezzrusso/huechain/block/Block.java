@@ -3,6 +3,8 @@ package br.com.jezzrusso.huechain.block;
 import java.util.Calendar;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,37 +15,53 @@ public class Block {
 	private final String lastHash;
 	private final String hash;
 	private final String data;
+	private final Long nonce;
 
 	@JsonCreator
 	public Block(@JsonProperty("timestamp") Long timestamp, @JsonProperty("lastHash") String lastHash,
-			@JsonProperty("hash") String hash, @JsonProperty("data") String data) {
+			@JsonProperty("hash") String hash, @JsonProperty("data") String data, @JsonProperty("nonce")Long nonce) {
 		super();
 		this.timestamp = timestamp;
 		this.lastHash = lastHash;
 		this.hash = hash;
 		this.data = data;
+		this.nonce = nonce;
 	}
 
 	@Override
 	public String toString() {
-		return "{Block:{timestamp:" + timestamp + ",lastHash:" + lastHash + ",hash:" + hash + ",data:" + data + "}}";
+		return "{Block:{timestamp:" + timestamp + ",lastHash:" + lastHash + ",hash:" + hash + ",data:" + data
+				+ ",nonce:" + nonce + "}}";
 	}
 
 	public static Block genesis() {
-		return new Block(0L, "------", "g3n3515", "[]");
+		return new Block(0L, "------", "g3n3515", "[]", 0L);
 	}
 
-	public static Block mineBlock(String lastHash, String data) {
-		final Long timestamp = Calendar.getInstance().getTimeInMillis();
-		return new Block(timestamp, lastHash, hash(timestamp, lastHash, data), data);
+	public static Block mineBlock(final Block lastBlock, String data, final Integer difficulty) {
+		final String initObrigatory = new String(new char[difficulty]).replace("\0", "0");
+
+		final String lastHash = lastBlock.getHash();
+		Long timestamp;
+		String hash;
+		Long nonce = 0L;
+
+		do {
+			nonce++;
+			timestamp = Calendar.getInstance().getTimeInMillis();
+			hash = Block.hash(timestamp, lastHash, data, nonce);
+		} while (!initObrigatory.equals(hash.substring(0, difficulty)));
+
+		return new Block(timestamp, lastBlock.getHash(), hash(timestamp, lastBlock.getHash(), data, nonce), data,
+				nonce);
 	}
 
-	public static String hash(Long timestamp, String lastHash, String data) {
-		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data));
+	public static String hash(Long timestamp, String lastHash, String data, Long nonce) {
+		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data).concat(nonce.toString()));
 	}
 
 	public static String blockHash(Block block) {
-		return hash(block.getTimestamp(), block.getLastHash(), block.getData());
+		return hash(block.getTimestamp(), block.getLastHash(), block.getData(), block.getNonce());
 	}
 
 	public Long getTimestamp() {
@@ -116,5 +134,9 @@ public class Block {
 		return true;
 	}
 
+	public Long getNonce() {
+		return nonce;
+	}
 
+	
 }

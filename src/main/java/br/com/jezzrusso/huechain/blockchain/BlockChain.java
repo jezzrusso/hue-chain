@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -29,22 +30,24 @@ public class BlockChain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlockChain.class);
 	private List<Block> chain;
 	private final WebSocketOperations webSocketOperations;
+	private final Integer difficulty;
 
 	@Autowired
-	public BlockChain(WebSocketOperations webSocketOperations) {
+	public BlockChain(WebSocketOperations webSocketOperations, @Value("${huechain.difficulty}") Integer difficulty) {
 		this.chain = new ArrayList<>();
 		this.chain.add(Block.genesis());
 		this.webSocketOperations = webSocketOperations;
+		this.difficulty = difficulty;
 	}
 
 	public Block addBlock(String data) {
-		Block newBlock = Block.mineBlock(this.chain.get(this.chain.size() - 1).getHash(), data);
+		Block newBlock = Block.mineBlock(this.chain.get(this.chain.size() - 1), data, this.difficulty);
 		ArrayList<Block> chain = new ArrayList<>(this.chain);
 		chain.add(newBlock);
 		try {
 			this.replaceBlockchain(chain);
 			this.webSocketOperations.synchChain();
-			
+
 		} catch (UnmodifiedBlockchainException e) {
 			LOGGER.info(e.getMessage());
 		} catch (IOException e) {
@@ -52,7 +55,6 @@ public class BlockChain {
 		}
 		return newBlock;
 	}
-
 
 	public List<Block> getBlockChain() {
 		return Collections.unmodifiableList(this.chain);
