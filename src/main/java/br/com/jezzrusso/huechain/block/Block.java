@@ -145,7 +145,7 @@ public class Block {
 		return true;
 	}
 	
-	private static Integer adjustDifficulty(final Block lastBlock, final Long currentTime, Long mineRate) {
+	public static Integer adjustDifficulty(final Block lastBlock, final Long currentTime, Long mineRate) {
 		if(mineRate == null) {
 			mineRate = 3000L;
 		}
