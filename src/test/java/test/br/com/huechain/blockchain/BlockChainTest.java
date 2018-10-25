@@ -1,6 +1,7 @@
 package test.br.com.huechain.blockchain;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,23 +44,34 @@ public class BlockChainTest {
 
 		assertEquals(Boolean.TRUE, blockChain.isValidChain(blockChain.getBlockChain()));
 	}
-	
+
 	@Test
 	public void invalidateACorruptChain() {
 		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null), 2);
 		blockChain.addBlock("didi mocó");
-		
+
 		Block blockGenesis = blockChain.getBlockChain().get(0);
 		Block block = blockChain.getBlockChain().get(1);
 		Block newBlock = new Block(123L, block.getHash(), "teste", "teste", 0L);
-		
+
 		List<Block> simulatedChain = new ArrayList<Block>();
 		simulatedChain.add(blockGenesis);
 		simulatedChain.add(block);
 		simulatedChain.add(newBlock);
+
+		assertEquals(Boolean.FALSE, blockChain.isValidChain(simulatedChain));
+
+	}
+
+	@Test
+	public void validateDifficulty() {
+		final Integer difficulty = 2;
+		BlockChain blockChain = new BlockChain(new WSMocks(null, null, null), difficulty);
+		blockChain.addBlock("dificuldade");
+		blockChain.addBlock("dificuldade deve permanecer");
 		
-		assertEquals(Boolean.FALSE, blockChain.isValidChain(simulatedChain)); 
-		
+		assertEquals("Novo bloco deve seguir a dificuldade configurada","00", blockChain.getBlockChain().get(1).getHash().substring(0, 2));
+		assertEquals("O outro bloco também deve seguir a configuração","00", blockChain.getBlockChain().get(2).getHash().substring(0, 2));
 	}
 
 }
