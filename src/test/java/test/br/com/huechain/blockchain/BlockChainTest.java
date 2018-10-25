@@ -52,7 +52,7 @@ public class BlockChainTest {
 
 		Block blockGenesis = blockChain.getBlockChain().get(0);
 		Block block = blockChain.getBlockChain().get(1);
-		Block newBlock = new Block(123L, block.getHash(), "teste", "teste", 0L);
+		Block newBlock = new Block(123L, block.getHash(), "teste", "teste", 0L, 1);
 
 		List<Block> simulatedChain = new ArrayList<Block>();
 		simulatedChain.add(blockGenesis);

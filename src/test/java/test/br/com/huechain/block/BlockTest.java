@@ -28,7 +28,7 @@ public class BlockTest {
 				+ ",lastHash:0x00000000000000000000000,hash:0xg3n35150000235A231C667,data:Primeiro Bloco,nonce:1}}";
 
 		Block block = new Block(timeInMillis, "0x00000000000000000000000", "0xg3n35150000235A231C667",
-				"Primeiro Bloco", 1L);
+				"Primeiro Bloco", 1L, 1);
 
 		assertEquals(stringBlock, block.toString());
 
@@ -45,7 +45,7 @@ public class BlockTest {
 	@Test
 	public void mineBlockMustWorks() {
 		Block genesis = Block.genesis();
-		Block hueBlock = Block.mineBlock(genesis, "hue", 2);
+		Block hueBlock = Block.mineBlock(genesis, "hue");
 		assertEquals("lastHash must be equals gensis block in second block in blockchain", genesis.getHash(),
 				hueBlock.getLastHash());
 		assertNotNull("hash of block should be not empty", hueBlock.getHash());

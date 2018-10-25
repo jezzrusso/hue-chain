@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import br.com.jezzrusso.huechain.config.HuechainProperties;
+
+
 public class Block {
 
 	private final Long timestamp;
@@ -16,31 +19,36 @@ public class Block {
 	private final String hash;
 	private final String data;
 	private final Long nonce;
+	private final Integer difficulty;
+	
 
 	@JsonCreator
 	public Block(@JsonProperty("timestamp") Long timestamp, @JsonProperty("lastHash") String lastHash,
-			@JsonProperty("hash") String hash, @JsonProperty("data") String data, @JsonProperty("nonce")Long nonce) {
+			@JsonProperty("hash") String hash, @JsonProperty("data") String data, @JsonProperty("nonce") Long nonce,
+			@JsonProperty("difficulty") Integer difficulty) {
 		super();
 		this.timestamp = timestamp;
 		this.lastHash = lastHash;
 		this.hash = hash;
 		this.data = data;
 		this.nonce = nonce;
+		this.difficulty = difficulty;
 	}
 
 	@Override
 	public String toString() {
 		return "{Block:{timestamp:" + timestamp + ",lastHash:" + lastHash + ",hash:" + hash + ",data:" + data
-				+ ",nonce:" + nonce + "}}";
+				+ ",nonce:" + nonce + ",difficulty:" + difficulty + "}}";
 	}
 
 	public static Block genesis() {
-		return new Block(0L, "------", "g3n3515", "[]", 0L);
+		return new Block(0L, "------", "g3n3515", "[]", 0L, 3);
 	}
 
-	public static Block mineBlock(final Block lastBlock, String data, final Integer difficulty) {
-		final String initObrigatory = new String(new char[difficulty]).replace("\0", "0");
-
+	public static Block mineBlock(final Block lastBlock, String data) {
+		Integer difficulty = lastBlock.getDifficulty();
+		String initObrigatory = new String(new char[difficulty]).replace("\0", "0");
+		
 		final String lastHash = lastBlock.getHash();
 		Long timestamp;
 		String hash;
@@ -49,19 +57,22 @@ public class Block {
 		do {
 			nonce++;
 			timestamp = Calendar.getInstance().getTimeInMillis();
-			hash = Block.hash(timestamp, lastHash, data, nonce);
+			difficulty = adjustDifficulty(lastBlock, timestamp, HuechainProperties.MINE_RATE);
+			initObrigatory = new String(new char[difficulty]).replace("\0", "0");
+			hash = Block.hash(timestamp, lastHash, data, nonce, difficulty);
 		} while (!initObrigatory.equals(hash.substring(0, difficulty)));
 
-		return new Block(timestamp, lastBlock.getHash(), hash(timestamp, lastBlock.getHash(), data, nonce), data,
-				nonce);
+		return new Block(timestamp, lastBlock.getHash(), hash(timestamp, lastBlock.getHash(), data, nonce, difficulty), data, nonce,
+				difficulty);
 	}
 
-	public static String hash(Long timestamp, String lastHash, String data, Long nonce) {
-		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data).concat(nonce.toString()));
+	public static String hash(Long timestamp, String lastHash, String data, Long nonce, Integer difficulty) {
+		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data).concat(nonce.toString())
+				.concat(difficulty.toString()));
 	}
 
 	public static String blockHash(Block block) {
-		return hash(block.getTimestamp(), block.getLastHash(), block.getData(), block.getNonce());
+		return hash(block.getTimestamp(), block.getLastHash(), block.getData(), block.getNonce(), block.difficulty);
 	}
 
 	public Long getTimestamp() {
@@ -133,10 +144,24 @@ public class Block {
 		}
 		return true;
 	}
+	
+	private static Integer adjustDifficulty(final Block lastBlock, final Long currentTime, Long mineRate) {
+		if(mineRate == null) {
+			mineRate = 3000L;
+		}
+		
+		Integer difficulty = lastBlock.getDifficulty();
+		
+		difficulty = lastBlock.timestamp + mineRate > currentTime ? difficulty + 1 : difficulty - 1;
+		return difficulty;
+	}
 
 	public Long getNonce() {
 		return nonce;
 	}
 
+	public Integer getDifficulty() {
+		return difficulty;
+	}
 	
 }

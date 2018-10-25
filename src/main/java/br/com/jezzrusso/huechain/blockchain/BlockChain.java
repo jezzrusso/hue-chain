@@ -41,7 +41,7 @@ public class BlockChain {
 	}
 
 	public Block addBlock(String data) {
-		Block newBlock = Block.mineBlock(this.chain.get(this.chain.size() - 1), data, this.difficulty);
+		Block newBlock = Block.mineBlock(this.chain.get(this.chain.size() - 1), data);
 		ArrayList<Block> chain = new ArrayList<>(this.chain);
 		chain.add(newBlock);
 		try {
