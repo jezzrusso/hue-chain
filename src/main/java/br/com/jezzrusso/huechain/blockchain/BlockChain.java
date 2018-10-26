@@ -30,14 +30,12 @@ public class BlockChain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BlockChain.class);
 	private List<Block> chain;
 	private final WebSocketOperations webSocketOperations;
-	private final Integer difficulty;
 
 	@Autowired
-	public BlockChain(WebSocketOperations webSocketOperations, @Value("${huechain.difficulty}") Integer difficulty) {
+	public BlockChain(WebSocketOperations webSocketOperations) {
 		this.chain = new ArrayList<>();
 		this.chain.add(Block.genesis());
 		this.webSocketOperations = webSocketOperations;
-		this.difficulty = difficulty;
 	}
 
 	public Block addBlock(String data) {
