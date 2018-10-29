@@ -17,9 +17,7 @@ import br.com.jezzrusso.huechain.config.HuechainProperties;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { HuechainProperties.class })
-@TestPropertySource(properties = {
-	    "huechain.minerate=3000",
-	})
+@TestPropertySource(properties = { "huechain.minerate=3000", "huechain.initBalance=10.00" })
 public class BlockTest {
 
 	@Autowired
