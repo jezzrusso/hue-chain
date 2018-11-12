@@ -2,15 +2,11 @@ package br.com.jezzrusso.huechain.block;
 
 import java.util.Calendar;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import br.com.jezzrusso.huechain.config.HuechainProperties;
-
+import br.com.jezzrusso.huechain.util.crypto.CryptoUtils;
 
 public class Block {
 
@@ -20,7 +16,6 @@ public class Block {
 	private final String data;
 	private final Long nonce;
 	private final Integer difficulty;
-	
 
 	@JsonCreator
 	public Block(@JsonProperty("timestamp") Long timestamp, @JsonProperty("lastHash") String lastHash,
@@ -48,7 +43,7 @@ public class Block {
 	public static Block mineBlock(final Block lastBlock, String data) {
 		Integer difficulty = lastBlock.getDifficulty();
 		String initObrigatory = new String(new char[difficulty]).replace("\0", "0");
-		
+
 		final String lastHash = lastBlock.getHash();
 		Long timestamp;
 		String hash;
@@ -59,20 +54,16 @@ public class Block {
 			timestamp = Calendar.getInstance().getTimeInMillis();
 			difficulty = adjustDifficulty(lastBlock, timestamp, HuechainProperties.MINE_RATE);
 			initObrigatory = new String(new char[difficulty]).replace("\0", "0");
-			hash = Block.hash(timestamp, lastHash, data, nonce, difficulty);
+			hash = CryptoUtils.hash(timestamp, lastHash, data, nonce, difficulty);
 		} while (!initObrigatory.equals(hash.substring(0, difficulty)));
 
-		return new Block(timestamp, lastBlock.getHash(), hash(timestamp, lastBlock.getHash(), data, nonce, difficulty), data, nonce,
-				difficulty);
-	}
-
-	public static String hash(Long timestamp, String lastHash, String data, Long nonce, Integer difficulty) {
-		return DigestUtils.sha256Hex(timestamp.toString().concat(lastHash).concat(data).concat(nonce.toString())
-				.concat(difficulty.toString()));
+		return new Block(timestamp, lastBlock.getHash(), CryptoUtils.hash(timestamp, lastBlock.getHash(), data, nonce, difficulty),
+				data, nonce, difficulty);
 	}
 
 	public static String blockHash(Block block) {
-		return hash(block.getTimestamp(), block.getLastHash(), block.getData(), block.getNonce(), block.difficulty);
+		return CryptoUtils.hash(block.getTimestamp(), block.getLastHash(), block.getData(), block.getNonce(),
+				block.difficulty);
 	}
 
 	public Long getTimestamp() {
@@ -144,14 +135,14 @@ public class Block {
 		}
 		return true;
 	}
-	
+
 	public static Integer adjustDifficulty(final Block lastBlock, final Long currentTime, Long mineRate) {
-		if(mineRate == null) {
+		if (mineRate == null) {
 			mineRate = 3000L;
 		}
-		
+
 		Integer difficulty = lastBlock.getDifficulty();
-		
+
 		difficulty = lastBlock.timestamp + mineRate > currentTime ? difficulty + 1 : difficulty - 1;
 		return difficulty;
 	}
@@ -163,5 +154,5 @@ public class Block {
 	public Integer getDifficulty() {
 		return difficulty;
 	}
-	
+
 }
